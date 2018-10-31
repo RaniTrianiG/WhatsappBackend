@@ -12,7 +12,8 @@ const sequelize = new Sequelize('whatsapp', 'root', 'mahardika', {
     idle: 10000
   },
   define:{
-    freezeTableName:true
+    freezeTableName:true,
+    timestamps: false,
   }
 });
 
