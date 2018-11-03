@@ -6,6 +6,7 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
@@ -19,6 +20,7 @@
     "sequelize": "^4.41.0",
     "sequelize-cli": "^5.2.0",
     "socket.io": "^2.1.1",
+    "socket.io-sequelize": "^1.0.1",
     "tedious": "^3.0.1"
   }
 }

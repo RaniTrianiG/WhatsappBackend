@@ -12,6 +12,7 @@ var sequelize     = require('../config/connection')
 router.get('/',(req, res) => {
   res.send('api listen')
 })
+//GET USER
 router.get('/user',(req, res)=>{
   user.findAll().then(result =>{
     // const today = new Date()
@@ -22,20 +23,38 @@ router.get('/user',(req, res)=>{
     res.json(result)
   })
 })
+//GET CHAT
 router.get('/chat',(req, res)=>{
   chat.findAll().then(result =>{
     res.json(result)
   })
 })
+//GET CHANNEL BY CH_ID
+router.get('/chat/ch=:channel', (req, res) => {
+  chat.findAll({where:{channel_id: req.params.channel}}).then(result => {
+    res.json(result)
+  })
+})
+//GET CHANNEL
 router.get('/channel',(req, res)=>{
   channel.findAll().then(result =>{
     res.json(result)
   })
 })
-router.get('/dataChat/:id',(req, res)=>{
+//GET DATACHAT
+router.get('/dataChat/:id',(req, res, next)=>{
   sequelize.sequelize.query("select channel.id, channel_user.user_id, channel.name, channel.type, chat.message, chat.image_url from channel inner join channel_user on channel.id = channel_user.channel_id inner join chat on channel.id = chat.channel_id where channel.id ="+req.params.id+""
   ,).spread(result =>{
-    res.json(result)
+    // res.json(result)
+    if (result == '') {
+      next
+        user.findAll()
+       .then(hasil=>{
+         res.json(hasil)
+      })
+    }else{
+      res.json(result)
+    }
   })
 })
 
@@ -54,7 +73,11 @@ router.post('/user',(req, res)=>{
     res.json(user)
   })
   .catch(err =>{
-    res.send(err)
+    user.findOne({where:{phone_number}})
+    .then(hasil =>{
+      res.json(hasil)
+    })
+    // res.json( err.errors)
   })
 })
 // login with jwt

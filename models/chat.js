@@ -7,6 +7,7 @@ const chat = sequelize.define('chat', {
     autoIncrement: true,
   },
   'channel_id': Sequelize.INTEGER,
+  'name': Sequelize.STRING,
   'message': Sequelize.TEXT,
   'image_url': Sequelize.TEXT,
   'createdAt': {
