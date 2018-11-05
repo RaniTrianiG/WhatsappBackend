@@ -20,7 +20,14 @@ router.get('/user',(req, res)=>{
     // const mm    = today.getMonth()
     // const yy    = today.getFullYear()
     // console.log('get user', dd, mm, yy)
-    res.json(result)
+    res.send(result)
+    var data = result
+    console.log(JSON.stringify(data))
+    for (let i = 0; i < result.length; i++) {
+      // const element = array[i];
+      console.log(result[i]['id'])
+      
+    }
   })
 })
 //GET CHAT
@@ -71,7 +78,7 @@ router.get('/chatlist/ch=:channel', (req, res) => {
     })
 })
 router.get('/chatlist', (req, res) => {
-  sequelize.sequelize.query("select channel.id,channel.type, channel.name from channel inner join user on channel.id = user.id"
+  sequelize.sequelize.query("select channel.id,channel.type, channel.name,chat.message, chat.createdAt from channel inner join user on channel.id = user.id inner join chat on channel.id = chat.channel_id group by channel.id order by chat.message desc"
   ,).spread(result => {
       res.json(result)
     })
@@ -83,9 +90,9 @@ router.post('/user',(req, res)=>{
   const name = req.body.name
   const profile_picture_url = req.body.profile_picture_url
   user.create({
-    phone_number: phone_number,
-    name: name,
-    profile_picture_url: profile_picture_url
+    phone_number,
+    name,
+    profile_picture_url
   })
   .then(user =>{
     res.json(user)
@@ -111,11 +118,18 @@ router.post('/login',(req, res)=>{
     }
   })
 })
-// post chat
-router.post('/sendChat', (req, res)=>{
-  sequelize.sequelize.query("").spread(result =>{
-    
+router.post('/newChat', (req, res, err)=>{
+  var name = req.body.name
+  var my_name = req.body.my_name
+  var from_name = req.body.from_name
+  channel.create({
+    name,
+    type:'one_on_one'
+  }).then(result =>{
+    var id = result.id
+    channel_user.create({})
   })
+
 })
 // edit data profile user
 router.put('/user/:id',(req, res)=>{
@@ -135,3 +149,16 @@ router.put('/user/:id',(req, res)=>{
 } )
 
 module.exports = router
+
+
+// select channel_user.channel_id, channel_user.user_id, user.name#, chat.message
+// from channel_user
+// inner join user on channel_user.user_id = user.id
+// inner join chat on channel_user.id = u
+// #inner join chat on channel_user.id = chat.user_id
+
+// #select channel.id, channel.type, channel.name, chat.message, chat.createdAt
+// #from channel
+// #inner join user on channel.id = user.id
+// #inner join chat on channel.id = chat.channel_id
+// #group by channel.id order by chat.message desc
