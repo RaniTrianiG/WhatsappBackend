@@ -18,7 +18,6 @@
     "mysql": "^2.16.0",
     "mysql2": "^1.6.1",
     "sequelize": "^4.41.0",
-    "sequelize-cli": "^5.2.0",
     "socket.io": "^2.1.1",
     "socket.io-sequelize": "^1.0.1",
     "tedious": "^3.0.1"

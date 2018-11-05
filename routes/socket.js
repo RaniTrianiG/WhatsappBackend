@@ -7,7 +7,7 @@ exports = module.exports = (io) =>{
     socket.on('SEND_MESSAGE', (data) => {
       chat.create({
         channel_id: data.channel_id,
-        name: data.name,
+        user_id: data.user_id,
         message: data.message,
         image_url: data.image_url,
       })
