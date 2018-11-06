@@ -25,9 +25,9 @@ router.get('/user',(req, res)=>{
     console.log(JSON.stringify(data))
     for (let i = 0; i < result.length; i++) {
       // const element = array[i];
-      console.log(result[i]['id'])
-      
+      console.log(result[i]['id']) 
     }
+    console.log(result['id'])
   })
 })
 //GET CHAT
@@ -78,10 +78,19 @@ router.get('/chatlist/ch=:channel', (req, res) => {
     })
 })
 router.get('/chatlist', (req, res) => {
-  sequelize.sequelize.query("select channel.id,channel.type, channel.name,chat.message, chat.createdAt from channel inner join user on channel.id = user.id inner join chat on channel.id = chat.channel_id group by channel.id order by chat.message desc"
+  sequelize.sequelize.query("select channel.id,channel.name, channel.type, group_concat(DISTINCT channel_user.user_id) as user_id, group_concat(chat.message order by chat.message asc limit 1) as message from channel inner join channel_user on channel_user.channel_id = channel.id inner join chat on chat.channel_id = channel.id group by channel.name, channel.id"
   ,).spread(result => {
       res.json(result)
     })
+})
+router.get('/chatlist/detail',(req, res )=>{
+  chat.findAll({attributes:['channel_id','message','createdAt']})
+  .then(result =>{
+    res.json(result)
+  })
+  .catch(err =>{
+   res.json(err)
+  })
 })
 
 //create user
@@ -149,16 +158,3 @@ router.put('/user/:id',(req, res)=>{
 } )
 
 module.exports = router
-
-
-// select channel_user.channel_id, channel_user.user_id, user.name#, chat.message
-// from channel_user
-// inner join user on channel_user.user_id = user.id
-// inner join chat on channel_user.id = u
-// #inner join chat on channel_user.id = chat.user_id
-
-// #select channel.id, channel.type, channel.name, chat.message, chat.createdAt
-// #from channel
-// #inner join user on channel.id = user.id
-// #inner join chat on channel.id = chat.channel_id
-// #group by channel.id order by chat.message desc
