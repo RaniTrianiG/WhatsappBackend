@@ -15,11 +15,6 @@ router.get('/',(req, res) => {
 //GET USER
 router.get('/user',(req, res)=>{
   user.findAll().then(result =>{
-    // const today = new Date()
-    // const dd    = today.getDate()
-    // const mm    = today.getMonth()
-    // const yy    = today.getFullYear()
-    // console.log('get user', dd, mm, yy)
     res.send(result)
     var data = result
     console.log(JSON.stringify(data))
@@ -37,13 +32,10 @@ router.get('/chat',(req, res)=>{
   })
 })
 //GET CHANNEL BY CH_ID
-// router.get('/chat/ch=:channel', (req, res) => {
-//   chat.findAll({where:{channel_id: req.params.channel}}).then(result => {
-//     res.json(result)
-//   })
-// })
 router.get('/chat/ch=:channel', (req, res) => {
-  sequelize.sequelize.query("select chat.id,user.name,chat.channel_id, chat.user_id, chat.message,chat.image_url,chat.createdAt, chat.updatedAt from chat inner join user on chat.user_id = user.id where channel_id ="+req.params.channel+""
+  sequelize.sequelize.query("select chat.id,user.name,chat.channel_id, \
+  chat.user_id, chat.message,chat.image_url,chat.createdAt, chat.updatedAt \
+  from chat inner join user on chat.user_id = user.id where channel_id ="+req.params.channel+""
   ,).spread(result => {
     res.json(result)
     })
@@ -56,8 +48,11 @@ router.get('/channel',(req, res)=>{
 })
 //GET DATACHAT
 router.get('/dataChat/:id',(req, res, next)=>{
-  sequelize.sequelize.query("select channel.id, channel_user.user_id, channel.name, channel.type, chat.message, chat.image_url from channel inner join channel_user on channel.id = channel_user.channel_id inner join chat on channel.id = chat.channel_id where channel.id ="+req.params.id+""
-  ,).spread(result =>{
+  sequelize.sequelize.query("select channel.id, channel_user.user_id, \
+  channel.name, channel.type, chat.message, chat.image_url from channel \
+  inner join channel_user on channel.id = channel_user.channel_id inner join \
+  chat on channel.id = chat.channel_id where channel.id ="+req.params.id+"").
+  spread(result =>{
     // res.json(result)
     if (result == '') {
       next
@@ -72,14 +67,19 @@ router.get('/dataChat/:id',(req, res, next)=>{
 })
 //get chatlist
 router.get('/chatlist/ch=:channel', (req, res) => {
-  sequelize.sequelize.query("select channel.id,channel.type, channel.name from channel inner join user on channel.id = user.id where channel.id ="+req.params.channel+""
+  sequelize.sequelize.query("select channel.id,channel.type, channel.name from channel \
+  inner join user on channel.id = user.id where channel.id ="+req.params.channel+""
   ,).spread(result => {
       res.json(result)
     })
 })
 router.get('/chatlist', (req, res) => {
-  sequelize.sequelize.query("select channel.id,channel.name, channel.type, group_concat(DISTINCT channel_user.user_id) as user_id, group_concat(chat.message order by chat.message asc limit 1) as message from channel inner join channel_user on channel_user.channel_id = channel.id inner join chat on chat.channel_id = channel.id group by channel.name, channel.id"
-  ,).spread(result => {
+  sequelize.sequelize.query("select channel.id,channel.name, channel.type, \
+  group_concat(DISTINCT channel_user.user_id) as user_id, \
+  group_concat(chat.message order by chat.message asc limit 1) as \
+  message from channel inner join channel_user on channel_user.channel_id = channel.id \
+  inner join chat on chat.channel_id = channel.id group by channel.name, channel.id")
+  .spread(result => {
       res.json(result)
     })
 })
@@ -95,9 +95,9 @@ router.get('/chatlist/detail',(req, res )=>{
 
 //create user
 router.post('/user',(req, res)=>{
-  const phone_number = req.body.phone_number
-  const name = req.body.name
-  const profile_picture_url = req.body.profile_picture_url
+  var phone_number = req.body.phone_number
+  var name = req.body.name
+  var profile_picture_url = req.body.profile_picture_url
   user.create({
     phone_number,
     name,
@@ -127,17 +127,19 @@ router.post('/login',(req, res)=>{
     }
   })
 })
-router.post('/newChat', (req, res, err)=>{
-  var name = req.body.name
-  var my_name = req.body.my_name
-  var from_name = req.body.from_name
+router.post('/newchat', (req, res, err)=>{
+  var name = req.body.name +'_'+ req.body.friend
   channel.create({
     name,
     type:'one_on_one'
   }).then(result =>{
-    var id = result.id
-    channel_user.create({})
-  })
+    var channel_id = result['id']
+    var my_user_id = req.body.my_user_id
+    var from_user_id = req.body.from_user_id
+    channel_user.create({channel_id,user_id: my_user_id})
+    channel_user.create({channel_id,user_id: from_user_id})
+    res.send('created new chat')
+  }).catch(err => res.send(err))
 
 })
 // edit data profile user
@@ -153,8 +155,26 @@ router.put('/user/:id',(req, res)=>{
     }
   })
   .then(result =>{
-    res.json('updated')
+    res.send('user updated')
   })
-} )
+})
+// Edit Chat message
+router.put('/chat/:id',(req, res)=>{
+  var message = req.body.message
+  var id = req.params.id
+  chat.update({message, updatedAt: chat.sequelize.fn('NOW')},{where:{id}})
+  .then(()=>{
+    res.send('chat edited')
+  })
+})
+// Delete Chat
+router.delete('/chat/del=:id',(req, res)=>{
+  var id = req.params.id
+  chat.destroy({where:{id}})
+  .then(()=>{
+    res.send('chat deleted')
+  })
+
+})
 
 module.exports = router
