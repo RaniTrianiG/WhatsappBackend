@@ -1,7 +1,7 @@
 
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('whatsapp', 'root', 'mahardika', {
-  host: '172.20.0.1',
+  host: '127.0.0.1',
   dialect: 'mysql',
   operatorsAliases: false,
 
