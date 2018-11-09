@@ -19,11 +19,16 @@ router.get('/user',(req, res)=>{
     var data = result
     console.log(JSON.stringify(data))
     for (let i = 0; i < result.length; i++) {
-      // const element = array[i];
       console.log(result[i]['id']) 
     }
     console.log(result['id'])
   })
+})
+// GET USER BY NUMBER
+router.get('/user/num=:phone_number',(req, res) =>{
+  var phone_number = req.params.phone_number
+  user.findOne({where:{phone_number}})
+  .then(result => res.send(result))
 })
 //GET CHAT
 router.get('/chat',(req, res)=>{
@@ -127,6 +132,7 @@ router.post('/login',(req, res)=>{
     }
   })
 })
+// new chat
 router.post('/newchat', (req, res, err)=>{
   var name = req.body.name +'_'+ req.body.friend
   channel.create({

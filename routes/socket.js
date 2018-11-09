@@ -1,9 +1,9 @@
 var chat = require('../models/chat');
 
  pesan = io =>{
-   io.on('connection', function (socket) {
+   io.on('connection',(socket) => {
      console.log('a user connected');
-     socket.on('disconnect', function () {
+     socket.on('disconnect',() => {
        console.log('user disconnected');
       });
       socket.on('SEND_MESSAGE', (data) => {
